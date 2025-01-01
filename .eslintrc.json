@@ -1,0 +1,12 @@
+{
+    "root": true,
+    "overrides": [
+        {
+            "files": ["*.tsx"],
+            "rules": {
+                "no-unused-vars": "off"
+            }
+        }
+    ]
+}
+
