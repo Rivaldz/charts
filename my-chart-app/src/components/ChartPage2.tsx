@@ -12,6 +12,7 @@ import {
   Legend,
   Line,
   ComposedChart,
+  Rectangle
 } from "recharts";
 import { ProcessKlinikData } from "@/lib/processData";
 
@@ -34,20 +35,12 @@ import {
 } from "@/components/ui/chart";
 
 const chartConfig = {
-  revenue: {
-    label: "Revenue",
+  total_revenue_expense: {
+    label: "Total Revenue Expense",
     color: "hsl(var(--chart-1))",
-  },
-  expense: {
-    label: "Expense",
-    color: "hsl(var(--chart-2))",
-  },
-  comulative: {
-    label: "Cumulative",
-    color: "hsl(var(--chart-3))",
-  },
+  }
 } satisfies ChartConfig;
-
+const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#ff0000"];
 export default function ChartPage({ chartData }) {
   console.info(chartData);
   return (
@@ -57,8 +50,8 @@ export default function ChartPage({ chartData }) {
         <CardDescription></CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig}>
-          <ComposedChart accessibilityLayer data={chartData} stackOffset="sign">
+         <ChartContainer config={chartConfig}>
+          <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -66,29 +59,31 @@ export default function ChartPage({ chartData }) {
               tickMargin={10}
               axisLine={false}
             />
+
             <YAxis domain={["auto", "auto"]} allowDataOverflow />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="revenue"
-              stackId="stack"
-              fill="var(--color-revenue)"
-              radius={[0, 0, 4, 4]}
+
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
             <Bar
-              dataKey="expense"
-              stackId="stack"
-              fill="var(--color-expense)"
-              radius={[4, 4, 0, 0]}
-            />
-            <Line
-              type="monotone"
-              dataKey="comulative"
-              stroke="var(--color-comulative)"
+              dataKey="total_revenue_expense"
               strokeWidth={2}
-              dot={true}
-            />
-          </ComposedChart>
+              radius={8}
+              activeIndex={2}
+              fill="#8884d8" // Default color jika tidak ada warna yang dihasilkan
+              shape={({ x, y, width, height, index }) => (
+                <Rectangle
+                  x={x}
+                  y={y}
+                  width={width}
+                  height={height}
+                  fill={colors[index % colors.length]} // Warna dari array berdasarkan indeks
+                  stroke={colors[index % colors.length]}
+                  fillOpacity={0.9}
+                />
+              )}            />
+          </BarChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">

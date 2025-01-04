@@ -20,6 +20,7 @@ export function ProcessKlinikData() {
 
     // Check if the value is an array
     if (Array.isArray(dataArray)) {
+      //let totalMonth = 0;
       dataArray.forEach((entry) => {
         const date = new Date(entry.Period);
         const month = date.toLocaleString("default", { month: "short" });
@@ -28,13 +29,16 @@ export function ProcessKlinikData() {
         if (year < "26") {
           // Initialize the monthly data if it doesn't exist
           if (!monthlyData[monthYear]) {
-            monthlyData[monthYear] = { Revenue: 0, Expense: 0 };
+            monthlyData[monthYear] = { Revenue: 0, Expense: 0, Comulative: 0 };
           }
 
           // Sum up Revenue and Expense
           monthlyData[monthYear].Revenue += entry.Revenue; //Posive value
           monthlyData[monthYear].Expense += -Math.abs(entry.Expense); // abs to negative
-          //monthlyData[monthYear].Expense += entry.Expense; // abs to negative
+
+
+          //totalMonth += (entry.Revenue + -Math.abs(entry.Expense));
+          //monthlyData[monthYear].Comulative += totalMonth; // abs to negative
           //
         }
       });
@@ -42,12 +46,19 @@ export function ProcessKlinikData() {
   }
 
   // Convert the result back to an array of objects in the desired format
-  const chartData = Object.keys(monthlyData).map((monthYear) => ({
-    month: monthYear,
-    revenue: monthlyData[monthYear].Revenue,
-    expense: monthlyData[monthYear].Expense,
-    comulative: monthlyData[monthYear].Revenue + monthlyData[monthYear].Expense,
-  }));
+  let totalMonth = 0;
+  const chartData = Object.keys(monthlyData).map((monthYear) => {
+    // Calculate the total for the current month
+    totalMonth += monthlyData[monthYear].Revenue + monthlyData[monthYear].Expense; // Update totalMonth
+
+    return {
+      month: monthYear,
+      revenue: monthlyData[monthYear].Revenue,
+      expense: monthlyData[monthYear].Expense,
+      comulative: totalMonth, // Use the updated totalMonth
+      total_revenue_expense: monthlyData[monthYear].Revenue + monthlyData[monthYear].Expense
+    };
+  });
 
   return chartData;
 }
