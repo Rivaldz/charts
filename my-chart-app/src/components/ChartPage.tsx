@@ -78,6 +78,9 @@ export default function ChartPage({ chartData }) {
               dataKey="expense"
               stackId="stack"
               fill="var(--color-expense)"
+              animationBegin={500} // Delay animasi berdasarkan indeks
+              animationDuration={800} // Durasi animasi setiap bar
+              animationEasing="ease-in-out"
               radius={[4, 4, 0, 0]}
             />
             <Line
