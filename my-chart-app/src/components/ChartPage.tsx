@@ -49,7 +49,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function ChartPage({ chartData }) {
-  console.info(chartData);
   return (
     <Card style={{width:'100%'}}>
       <CardHeader>

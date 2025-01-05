@@ -1,7 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Spinner from "@/components/ui/spinner";
 import ChartPage from "@/components/ChartPage";
 import ChartPage2 from "@/components/ChartPage2";
 import ChartPage3 from "@/components/ChartPage3";
-import { ProcessKlinikData } from "@/lib/processData";
 import {
   Card,
   CardContent,
@@ -9,56 +12,118 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+// Opsi Checkbox Default
+const OPTIONS = [
+  "Gross Profit",
+  "Debt Repayment",
+  "Indirect Expense",
+  "Equipment Procurement",
+  "Fit Out",
+  "Cumulative Cashflow",
+];
+
 export default function Home() {
-  const data = ProcessKlinikData();
+  const [selectedOptions, setSelectedOptions] = useState(OPTIONS);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(false); // State untuk loading animasi
+
+  // Ambil data awal dari API saat komponen dimuat
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true); // Mulai loading
+      try {
+        const response = await fetch("/api/page");
+        const data = await response.json();
+        setChartData(data);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      } finally {
+        setLoading(false); // Selesai loading
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleCheckboxChange = (event) => {
+    const value = event.target.value;
+    setSelectedOptions((prev) => {
+      if (prev.includes(value)) {
+        return prev.filter((option) => option !== value);
+      } else {
+        return [...prev, value];
+      }
+    });
+  };
+
+  // Update chartData setiap kali selectedOptions berubah
+  useEffect(() => {
+    const fetchFilteredData = async () => {
+      setLoading(true); // Mulai loading
+      try {
+        const response = await fetch("/api/filter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ selectedOptions }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch filtered data");
+        }
+
+        const data = await response.json();
+        setChartData(data);
+      } catch (error) {
+        console.error("Error fetching filtered data:", error);
+      } finally {
+        setLoading(false); // Selesai loading
+      }
+    };
+
+    fetchFilteredData();
+  }, [selectedOptions]);
+
   return (
     <main className="p-8">
       <h1 className="text-2xl font-bold mb-4">Stacked Chart Example</h1>
-      <div style={{ display: 'flex', alignItems: 'flex-start', width: '100vw' }}> {/* Menggunakan Flexbox */}
-        <div style={{ width: '50%' }} >
-          <ChartPage chartData={data} /> {/* Mengirim data ke ChartPage */}
-          <br />
-          <ChartPage2 chartData={data} /> {/* Mengirim data ke ChartPage */}
-          <br />
-          <ChartPage3 chartData={data} /> {/* Mengirim data ke ChartPage */}
+      {loading ? (
+        // Tampilkan Spinner saat loading
+        <div className="flex justify-center items-center min-h-[300px]">
+          <Spinner />
         </div>
-        <Card style={{ marginLeft: '20px' }}> {/* Tambahkan margin untuk jarak */}
-          <CardHeader>
-            <CardTitle>Options</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <label>
-              <input value="Gross Profit" type="checkbox" /> {/* Checkbox */}
-              Gross Profit
-            </label>
+      ) : (
+        <div style={{ display: "flex", alignItems: "flex-start", width: "100vw" }}>
+          <div style={{ width: "50%" }}>
+            <ChartPage chartData={chartData} />
             <br />
-            <label>
-              <input value="Debt Repayment" type="checkbox" /> {/* Checkbox */}
-              Debt Repayment
-            </label>
+            <ChartPage2 chartData={chartData} />
             <br />
-            <label>
-              <input value="Indirect Expense" type="checkbox" /> {/* Checkbox */}
-              Indirect Expense
-            </label>
-            <br />
-            <label>
-              <input value="Equipment Procurement" type="checkbox" /> {/* Checkbox */}
-              Equipment Procurement
-            </label>
-            <br />
-            <label>
-              <input value="Fit Out" type="checkbox" /> {/* Checkbox */}
-              Fit Out
-            </label>
-            <br />
-            <label>
-              <input value="Cumulative Cashflow" type="checkbox" /> {/* Checkbox */}
-              Cumulative Cashflow
-            </label>
-          </CardContent>
-        </Card>
-      </div>
+            <ChartPage3 chartData={chartData} />
+          </div>
+          <Card style={{ marginLeft: "20px" }}>
+            <CardHeader>
+              <CardTitle>Options</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {OPTIONS.map((option) => (
+                <div style={{ padding: "5px" }} key={option}>
+                  <label>
+                    <input
+                      style={{ marginRight: "5px" }}
+                      type="checkbox"
+                      value={option}
+                      checked={selectedOptions.includes(option)}
+                      onChange={handleCheckboxChange}
+                    />
+                    {option}
+                  </label>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </main>
   );
 }

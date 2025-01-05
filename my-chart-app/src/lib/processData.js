@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 
-export function ProcessKlinikData() {
+//export function ProcessKlinikData() {
+export default function handler(req, res) {
   // Path to the JSON file in the public directory
   const filePath = path.join(process.cwd(), "public", "data_klinik.json");
 
@@ -35,11 +36,6 @@ export function ProcessKlinikData() {
           // Sum up Revenue and Expense
           monthlyData[monthYear].Revenue += entry.Revenue; //Posive value
           monthlyData[monthYear].Expense += -Math.abs(entry.Expense); // abs to negative
-
-
-          //totalMonth += (entry.Revenue + -Math.abs(entry.Expense));
-          //monthlyData[monthYear].Comulative += totalMonth; // abs to negative
-          //
         }
       });
     }
@@ -59,6 +55,12 @@ export function ProcessKlinikData() {
       total_revenue_expense: monthlyData[monthYear].Revenue + monthlyData[monthYear].Expense
     };
   });
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      res.status(500).json({ error: 'Failed to read file' });
+      return;
+    }
+    res.status(200).json(JSON.parse(chartData)); // Mengembalikan data sebagai JSON
+  });
 
-  return chartData;
 }

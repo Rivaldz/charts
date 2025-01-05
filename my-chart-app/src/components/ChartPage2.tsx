@@ -42,7 +42,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#ff0000"];
 export default function ChartPage({ chartData }) {
-  console.info(chartData);
   return (
     <Card style={{width:'100%'}}>
       <CardHeader>
