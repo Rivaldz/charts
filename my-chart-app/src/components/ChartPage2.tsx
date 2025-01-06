@@ -12,7 +12,7 @@ import {
   Legend,
   Line,
   ComposedChart,
-  Rectangle
+  Rectangle,
 } from "recharts";
 import { ProcessKlinikData } from "@/lib/processData";
 
@@ -36,21 +36,25 @@ import {
 
 const chartConfig = {
   total_revenue_expense: {
-    label: "Total Revenue Expense",
+    label: "Total Net Cashflow",
     color: "hsl(var(--chart-1))",
-  }
+  },
 } satisfies ChartConfig;
 const colors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#ff0000"];
 export default function ChartPage({ chartData }) {
   return (
-    <Card style={{width:'100%'}}>
+    <Card style={{ width: "100%" }}>
       <CardHeader>
         <CardTitle>Bar Chart - Stacked + Legend</CardTitle>
         <CardDescription></CardDescription>
       </CardHeader>
       <CardContent>
-         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+        <ChartContainer config={chartConfig}>
+          <BarChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ top: 5, right: 5, left: 50, bottom: 5 }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="month"
@@ -59,34 +63,71 @@ export default function ChartPage({ chartData }) {
               axisLine={false}
             />
 
-            <YAxis domain={["auto", "auto"]} allowDataOverflow />
+            <YAxis
+              domain={["auto", "auto"]}
+              allowDataOverflow
+              tickFormatter={(value) => {
+                return new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                  minimumFractionDigits: 0,
+                }).format(value);
+              }}
+            />
 
             <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={({ payload, label }) => {
+                if (!payload || payload.length === 0) return null;
+
+                return (
+                  <div className="p-2 bg-white border rounded shadow-md text-sm">
+                    <p className="font-bold mb-1">{label}</p>
+                    {payload.map((entry, index) => (
+                      <div
+                        key={`item-${index}`}
+                        className="flex items-center gap-2"
+                      >
+                        {/* Warna Indikator */}
+                        <span
+                          className="inline-block w-3 h-3 rounded-full"
+                          style={{ backgroundColor: entry.color }}
+                        ></span>
+                        {/* Label dan Value */}
+                        <span>Total Net Cashflow: </span>
+                        <span className="font-medium ml-1">$
+                          {entry.value.toLocaleString("en-US", {
+                            maximumFractionDigits: 0,
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }}
             />
+
             <Bar
               dataKey="total_revenue_expense"
               strokeWidth={2}
               radius={8}
               activeIndex={2}
-              fill="#8884d8" // Default color jika tidak ada warna yang dihasilkan
+              fill="#82ca9d" // Default color jika tidak ada warna yang dihasilkan
               shape={({ x, y, width, height, index }) => (
                 <Rectangle
                   x={x}
                   y={y}
                   width={width}
                   height={height}
-                  fill={colors[index % colors.length]} // Warna dari array berdasarkan indeks
-                  stroke={colors[index % colors.length]}
+                  fill={"#82ca9d"} // Warna dari array berdasarkan indeks
+                  //stroke={colors[index % colors.length]}
                   fillOpacity={0.9}
                 />
-              )}            />
+              )}
+            />
           </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-      </CardFooter>
+      <CardFooter className="flex-col items-start gap-2 text-sm"></CardFooter>
     </Card>
   );
 }

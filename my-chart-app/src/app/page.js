@@ -19,7 +19,7 @@ const OPTIONS = [
   "Indirect Expense",
   "Equipment Procurement",
   "Fit Out",
-  "Cumulative Cashflow",
+  //"Cumulative Cashflow",
 ];
 
 export default function Home() {
@@ -94,7 +94,7 @@ export default function Home() {
         </div>
       ) : (
         <div style={{ display: "flex", alignItems: "flex-start", width: "100vw" }}>
-          <div style={{ width: "50%" }}>
+          <div style={{ width: "60%" }}>
             <ChartPage chartData={chartData} />
             <br />
             <ChartPage2 chartData={chartData} />
